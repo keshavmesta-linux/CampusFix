@@ -1,0 +1,166 @@
+
+from functools import wraps
+
+from flask import (
+    Blueprint, abort, flash, redirect,
+    render_template, request, session, url_for
+)
+
+from app.db import get_db
+
+admin = Blueprint("admin", __name__, url_prefix="/admin")
+
+VALID_STATUSES = ("Pending", "In Progress", "Resolved")
+
+
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if "user_id" not in session:
+            flash("Please log in first.", "error")
+            return redirect(url_for("auth.login"))
+
+        db = get_db()
+        user = db.execute(
+            "SELECT role FROM users WHERE id = ?",
+            (session["user_id"],),
+        ).fetchone()
+
+        if user is None or user["role"] != "admin":
+            abort(403)
+
+        return view(*args, **kwargs)
+
+    return wrapped_view
+
+
+@admin.route("/")
+@admin_required
+def dashboard():
+    db = get_db()
+
+    status_filter = request.args.get("status", "").strip()
+    search = request.args.get("q", "").strip()[:100]
+
+    counts = {
+        row["status"]: row["total"]
+        for row in db.execute(
+            "SELECT status, COUNT(*) AS total FROM reports GROUP BY status"
+        ).fetchall()
+    }
+
+    total_students = db.execute(
+        "SELECT COUNT(*) FROM users WHERE role = 'student'"
+    ).fetchone()[0]
+
+    category_rows = db.execute(
+        """
+        SELECT category, COUNT(*) AS total
+        FROM reports
+        GROUP BY category
+        ORDER BY total DESC, category ASC
+        """
+    ).fetchall()
+
+    category_labels = [
+        row["category"] or "Uncategorized"
+        for row in category_rows
+    ]
+    category_values = [row["total"] for row in category_rows]
+
+    status_labels = ["Pending", "In Progress", "Resolved"]
+    status_values = [counts.get(status, 0) for status in status_labels]
+
+    query = """
+        SELECT reports.*, users.name AS student_name,
+               users.email AS student_email
+        FROM reports
+        JOIN users ON users.id = reports.user_id
+        WHERE 1 = 1
+    """
+    params = []
+
+    if status_filter in VALID_STATUSES:
+        query += " AND reports.status = ?"
+        params.append(status_filter)
+
+    if search:
+        query += """
+            AND (
+                reports.title LIKE ? OR
+                reports.location LIKE ? OR
+                reports.category LIKE ? OR
+                users.name LIKE ?
+            )
+        """
+        term = f"%{search}%"
+        params.extend([term, term, term, term])
+
+    query += " ORDER BY reports.created_at DESC, reports.id DESC"
+
+    all_reports = db.execute(query, params).fetchall()
+
+    return render_template(
+        "admin_dashboard.html",
+        reports=all_reports,
+        counts=counts,
+        statuses=VALID_STATUSES,
+        status_filter=status_filter,
+        search=search,
+        total_students=total_students,
+        category_labels=category_labels,
+        category_values=category_values,
+        status_labels=status_labels,
+        status_values=status_values,
+    )
+
+
+
+@admin.route("/report/<int:report_id>/status", methods=["POST"])
+@admin_required
+def update_status(report_id):
+    new_status = request.form.get("status", "")
+
+    if new_status not in VALID_STATUSES:
+        abort(400, description="Invalid report status.")
+
+    db = get_db()
+
+    report = db.execute(
+        "SELECT id, user_id, status, title FROM reports WHERE id = ?",
+        (report_id,),
+    ).fetchone()
+
+    if report is None:
+        abort(404)
+
+    old_status = report["status"]
+
+    if old_status != new_status:
+        db.execute(
+            """
+            UPDATE reports
+            SET status = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+            """,
+            (new_status, report_id),
+        )
+
+        db.execute(
+            """
+            INSERT INTO notifications (user_id, report_id, message)
+            VALUES (?, ?, ?)
+            """,
+            (
+                report["user_id"],
+                report_id,
+                f'Your report "{report["title"]}" changed from '
+                f'{old_status} to {new_status}.',
+            ),
+        )
+
+        db.commit()
+
+    flash("Report status updated.", "success")
+    return redirect(url_for("admin.dashboard"))
+

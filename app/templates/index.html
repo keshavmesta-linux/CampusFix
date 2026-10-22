@@ -1,0 +1,103 @@
+
+{% extends "base.html" %}
+
+{% block title %}CampusFix | Improve Your Campus{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-content">
+        <span class="eyebrow">YOUR CAMPUS, YOUR VOICE</span>
+
+        <h1>Small reports.<br><span>Big improvements.</span></h1>
+
+        <p class="hero-text">
+            Help make your campus safer, cleaner, and better.
+            Report problems and follow their progress in one place.
+        </p>
+
+        <div class="hero-actions" id="report">
+            <a class="button primary" href="#how-it-works">
+                Report an issue <span>→</span>
+            </a>
+            <a class="button secondary" href="#how-it-works">
+                Explore how it works
+            </a>
+        </div>
+
+        <div class="trust-note">
+            <span class="status-dot"></span>
+            Your voice matters. Every issue counts.
+        </div>
+    </div>
+
+    <div class="hero-visual">
+        <div class="visual-card">
+            <div class="visual-top">
+                <span class="visual-label">CAMPUS OVERVIEW</span>
+                <span class="live-dot"></span>
+            </div>
+
+            <div class="visual-icon">🏫</div>
+            <h3>A better campus starts here.</h3>
+            <p>Report • Track • Improve</p>
+
+            <div class="sample-report">
+                <span class="sample-icon">💡</span>
+                <div>
+                    <strong>Classroom lighting</strong>
+                    <small>Sample issue preview</small>
+                </div>
+                <span class="pending">Pending</span>
+            </div>
+
+            <div class="sample-report">
+                <span class="sample-icon">🚰</span>
+                <div>
+                    <strong>Water facility</strong>
+                    <small>Sample issue preview</small>
+                </div>
+                <span class="progress">In progress</span>
+            </div>
+        </div>
+        <div class="decor decor-one"></div>
+        <div class="decor decor-two"></div>
+    </div>
+</section>
+
+<section class="features" id="how-it-works">
+    <div class="section-heading">
+        <span class="eyebrow">SIMPLE. TRANSPARENT. USEFUL.</span>
+        <h2>How CampusFix works</h2>
+        <p>Three simple steps to help improve your college.</p>
+    </div>
+
+    <div class="feature-grid">
+        <article class="feature-card">
+            <div class="feature-icon purple">📝</div>
+            <h3>01. Report</h3>
+            <p>Describe a campus problem and tell us where it happened.</p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon blue">🔎</div>
+            <h3>02. Track</h3>
+            <p>Check the status of your submitted reports.</p>
+        </article>
+
+        <article class="feature-card">
+            <div class="feature-icon green">✅</div>
+            <h3>03. Improve</h3>
+            <p>Follow progress as campus issues are addressed.</p>
+        </article>
+    </div>
+</section>
+
+<section class="cta">
+    <div>
+        <span class="eyebrow">LET'S MAKE A DIFFERENCE</span>
+        <h2>Notice a problem on campus?</h2>
+        <p>CampusFix will help you report it and track the progress.</p>
+    </div>
+    <a class="button light-button" href="#how-it-works">Get started →</a>
+</section>
+{% endblock %}

@@ -1,0 +1,65 @@
+
+{% extends "base.html" %}
+
+{% block title %}Notifications | CampusFix{% endblock %}
+
+{% block content %}
+<section class="page-section">
+    <div class="container">
+        <div class="section-heading">
+            <p class="eyebrow">STAY UPDATED</p>
+            <h1>Your Notifications 🔔</h1>
+            <p>Updates about the status of your reported issues.</p>
+        </div>
+
+        {% if notifications %}
+            <div class="report-list">
+                {% for notification in notifications %}
+                    <article class="report-card">
+                        <div class="report-card-header">
+                            <h3>Report Update</h3>
+
+                            {% if notification["is_read"] %}
+                                <span class="status-badge">Read</span>
+                            {% else %}
+                                <span class="status-badge">New</span>
+                            {% endif %}
+                        </div>
+
+                        <p>{{ notification["message"] }}</p>
+
+                        <small>
+                            {{ notification["created_at"] }}
+                        </small>
+
+                        {% if not notification["is_read"] %}
+                            <form
+                                method="POST"
+                                action="{{ url_for(
+                                    'reports.mark_notification_read',
+                                    notification_id=notification['id']
+                                ) }}"
+                            >
+                                <button class="nav-button" type="submit">
+                                    Mark as read
+                                </button>
+                            </form>
+                        {% endif %}
+                    </article>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="report-card">
+                <h3>You're all caught up! ✨</h3>
+                <p>No notifications yet. Updates will appear here when an admin changes your report status.</p>
+            </div>
+        {% endif %}
+
+        <p style="margin-top: 24px;">
+            <a href="{{ url_for('reports.my_reports') }}">
+                ← Back to My Reports
+            </a>
+        </p>
+    </div>
+</section>
+{% endblock %}

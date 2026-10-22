@@ -1,0 +1,35 @@
+
+{% extends "base.html" %}
+{% block title %}Login | CampusFix{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card">
+        <span class="eyebrow">WELCOME BACK</span>
+        <h1>Log in</h1>
+        <p>Continue helping improve your campus.</p>
+
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="notice {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email"
+                   maxlength="254" required autocomplete="email">
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   maxlength="128" required autocomplete="current-password">
+
+            <button class="button primary full-button" type="submit">
+                Log in →
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            New to CampusFix? <a href="{{ url_for('auth.register') }}">Create an account</a>
+        </p>
+    </div>
+</section>
+{% endblock %}

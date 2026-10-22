@@ -1,0 +1,46 @@
+
+{% extends "base.html" %}
+{% block title %}Report an Issue | CampusFix{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card report-card">
+        <span class="eyebrow">HELP IMPROVE YOUR CAMPUS</span>
+        <h1>Report an issue</h1>
+        <p>Provide accurate details so the right team can address the problem.</p>
+
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="notice {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post">
+            <label for="title">Issue title</label>
+            <input id="title" name="title" type="text"
+                   minlength="5" maxlength="100" required
+                   placeholder="e.g. Broken classroom fan">
+
+            <label for="category">Category</label>
+            <select id="category" name="category" required>
+                <option value="">Select a category</option>
+                {% for item in categories %}
+                    <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="location">Campus location</label>
+            <input id="location" name="location" type="text"
+                   minlength="2" maxlength="150" required
+                   placeholder="e.g. Block A, Room 12">
+
+            <label for="description">Description</label>
+            <textarea id="description" name="description"
+                      minlength="10" maxlength="2000" rows="5" required
+                      placeholder="Explain the issue and where it occurs..."></textarea>
+
+            <button class="button primary full-button" type="submit">
+                Submit report →
+            </button>
+        </form>
+    </div>
+</section>
+{% endblock %}

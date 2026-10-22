@@ -1,0 +1,42 @@
+
+{% extends "base.html" %}
+{% block title %}Create Account | CampusFix{% endblock %}
+
+{% block content %}
+<section class="auth-section">
+    <div class="auth-card">
+        <span class="eyebrow">JOIN CAMPUSFIX</span>
+        <h1>Create your account</h1>
+        <p>Help make your campus a better place.</p>
+
+        {% for category, message in get_flashed_messages(with_categories=true) %}
+            <div class="notice {{ category }}">{{ message }}</div>
+        {% endfor %}
+
+        <form method="post">
+            <label for="name">Full name</label>
+            <input id="name" name="name" type="text"
+                   minlength="2" maxlength="80" required
+                   autocomplete="name">
+
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email"
+                   maxlength="254" required autocomplete="email">
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   minlength="10" maxlength="128" required
+                   autocomplete="new-password">
+
+            <button class="button primary full-button" type="submit">
+                Create account →
+            </button>
+        </form>
+
+        <p class="auth-switch">
+            Already registered? <a href="{{ url_for('auth.login') }}">Log in</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
+

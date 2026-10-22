@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}My Reports | CampusFix{% endblock %}
+
+{% block content %}
+<section class="features">
+    <div class="section-heading">
+        <span class="eyebrow">YOUR SUBMISSIONS</span>
+        <h2>My Reports</h2>
+        <p>Track the progress of the campus issues you've reported.</p>
+
+        <a class="button primary"
+           href="{{ url_for('reports.create_report') }}">
+            + Report an issue
+        </a>
+    </div>
+
+    <div class="report-list">
+        {% for report in reports %}
+        <article class="feature-card report-item" data-report-id="{{ report.id }}">
+            <div class="report-details">
+                <span class="eyebrow">REPORT #{{ report.id }}</span>
+
+                <h3>{{ report.title }}</h3>
+
+                <p>
+                    <strong>Category:</strong> {{ report.category }}
+                </p>
+
+                <p>
+                    <strong>Location:</strong> {{ report.location }}
+                </p>
+
+                <p class="report-description">
+                    {{ report.description }}
+                </p>
+
+                <small>
+                    Submitted: {{ report.created_at }}
+                </small>
+
+                {% if report.updated_at %}
+                <br>
+                <small>
+                    Last updated: {{ report.updated_at }}
+                </small>
+                {% endif %}
+            </div>
+
+            <div class="report-status-wrapper">
+             <span
+    class="report-status {{ report.status|lower|replace(' ', '-') }}"
+    data-status="{{ report.status }}">
+    {{ report.status }}
+</span>
+            </div>
+        </article>
+        {% else %}
+        <article class="feature-card empty-state">
+            <h3>No reports yet</h3>
+            <p>Your submitted campus issues will appear here.</p>
+
+            <a class="button primary"
+               href="{{ url_for('reports.create_report') }}">
+                Submit your first report
+            </a>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+<script>
+(() => {
+    const statusUrl = {{ url_for('reports.my_reports_api') | tojson }};
+
+    async function refreshStatuses() {
+        try {
+            const response = await fetch(statusUrl, {
+                headers: { "Accept": "application/json" },
+                cache: "no-store"
+            });
+
+            if (!response.ok) return;
+
+            const reports = await response.json();
+
+            reports.forEach(report => {
+                const badge = document.querySelector(
+                    `[data-report-id="${report.id}"] .report-status`
+                );
+
+                if (!badge || badge.dataset.status === report.status) {
+    return;
+}
+
+               const icons = {
+                    "Pending": "•",
+                    "In Progress": "↻",
+                    "Resolved": "✓"
+                };
+
+                badge.textContent =
+    (icons[report.status] || "•") + " " + report.status;
+
+badge.dataset.status = report.status;
+
+                badge.className =
+                    "report-status " +
+                    report.status.toLowerCase().replaceAll(" ", "-");
+            });
+        } catch (error) {
+            console.log("Status refresh will retry.");
+        }
+    }
+
+    refreshStatuses();
+    setInterval(refreshStatuses, 5000);
+})();
+</script>
+{% endblock %}

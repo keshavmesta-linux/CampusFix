@@ -1,0 +1,95 @@
+
+{% extends "base.html" %}
+{% block title %}Admin Dashboard | CampusFix{% endblock %}
+
+{% block content %}
+<section class="features">
+    <div class="section-heading">
+        <span class="eyebrow">CAMPUSFIX MANAGEMENT</span>
+        <h2>Admin Dashboard</h2>
+        <p>Review campus issues and keep reports moving forward.</p>
+    </div>
+
+    {% for category, message in get_flashed_messages(with_categories=true) %}
+        <div class="notice {{ category }}">{{ message }}</div>
+    {% endfor %}
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <span>Total reports</span>
+            <strong>{{ counts.values()|sum }}</strong>
+        </article>
+        <article class="stat-card">
+            <span>Pending</span>
+            <strong>{{ counts.get('Pending', 0) }}</strong>
+        </article>
+        <article class="stat-card">
+            <span>In progress</span>
+            <strong>{{ counts.get('In Progress', 0) }}</strong>
+        </article>
+        <article class="stat-card">
+            <span>Resolved</span>
+            <strong>{{ counts.get('Resolved', 0) }}</strong>
+        </article>
+    </div>
+
+    <form class="filter-form" method="get">
+        <input type="search" name="q" value="{{ search }}"
+               maxlength="100" placeholder="Search title, location, category or student">
+
+        <select name="status">
+            <option value="">All statuses</option>
+            {% for item in statuses %}
+                <option value="{{ item }}"
+                    {% if status_filter == item %}selected{% endif %}>
+                    {{ item }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button class="button primary" type="submit">Filter</button>
+        <a class="button secondary" href="{{ url_for('admin.dashboard') }}">Reset</a>
+    </form>
+
+    <div class="report-list">
+        {% for report in reports %}
+            <article class="feature-card admin-report">
+                <div>
+                    <span class="eyebrow">REPORT #{{ report.id }}</span>
+                    <h3>{{ report.title }}</h3>
+                    <p>{{ report.category }} · {{ report.location }}</p>
+                    <p>{{ report.description }}</p>
+                    <small>
+                        Submitted by {{ report.student_name }}
+                        ({{ report.student_email }})
+                    </small>
+                    <br>
+                    <small>Created: {{ report.created_at }}</small>
+                </div>
+
+                <form method="post"
+                      action="{{ url_for('admin.update_status', report_id=report.id) }}"
+                      class="status-form">
+                    <label for="status-{{ report.id }}">Update status</label>
+                    <select id="status-{{ report.id }}" name="status" required>
+                        {% for item in statuses %}
+                            <option value="{{ item }}"
+                                {% if report.status == item %}selected{% endif %}>
+                                {{ item }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <button class="button primary" type="submit">
+                        Save status
+                    </button>
+                </form>
+            </article>
+        {% else %}
+            <article class="feature-card empty-state">
+                <h3>No matching reports</h3>
+                <p>Try another search or status filter.</p>
+            </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}
